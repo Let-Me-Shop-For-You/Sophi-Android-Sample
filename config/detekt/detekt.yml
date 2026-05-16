@@ -1,0 +1,82 @@
+naming:
+  FunctionNaming:
+    active: false
+  MatchingDeclarationName:
+    active: false
+
+complexity:
+  LongMethod:
+    ignoreAnnotated:
+      - 'Composable'
+  LongParameterList:
+    ignoreAnnotated:
+      - 'Composable'
+    ignoreFunction:
+      - 'init'
+    excludes:
+      - "**/theme/*.kt"
+  CyclomaticComplexMethod:
+    ignoreAnnotated:
+      - 'Composable'
+  TooManyFunctions:
+    active: false
+
+style:
+  DestructuringDeclarationWithTooManyEntries:
+    active: false
+  NewLineAtEndOfFile:
+    active: false
+  UnusedPrivateMember:
+    active: true
+    ignoreAnnotated:
+      - 'Preview'
+      - 'Composable'
+  UnusedParameter:
+    active: true
+    allowedNames: '_.*'
+  MaxLineLength:
+    maxLineLength: 140
+  ReturnCount:
+    max: 4
+  MagicNumber:
+    active: true
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '1'
+      - '2'
+      - '0L'
+      - '1L'
+      - '2L'
+      - '0.0'
+      - '1.0'
+      - '0f'
+      - '1f'
+    ignoreAnnotated:
+      - 'Composable'
+    ignoreHashCodeFunction: true
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: false
+    ignoreConstantDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreEnums: true
+    ignoreNamedArgument: true
+    ignoreExtensionFunctions: true
+    excludes:
+      - "**/theme/*.kt"
+      - "**/config/*.kt"
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: true
+    exceptionNames:
+      - 'ArrayIndexOutOfBoundsException'
+      - 'Error'
+      - 'IllegalMonitorStateException'
+      - 'IndexOutOfBoundsException'
+      - 'NullPointerException'
+      - 'RuntimeException'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  SwallowedException:
+    active: true
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
