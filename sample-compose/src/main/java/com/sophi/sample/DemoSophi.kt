@@ -23,6 +23,7 @@ object DemoSophi {
     /** Returns false when the tenant has no key: nothing is configured and the UI keeps the chat closed. */
     fun configure(context: Context, tenant: DemoTenant, externalUserId: String? = null): Boolean {
         val app = context.applicationContext
+        MerchantCart.onSnapshot = null
         val previous = DemoTenants.remembered(app)
         DemoTenants.remember(app, tenant)
         // A merchant cart belongs to one store: switching tenant starts from an empty one.
@@ -40,11 +41,12 @@ object DemoSophi {
             config = tenant.config,
             listener = DemoListener(app),
             externalUserId = externalUserId,
-            metadata = mapOf("source" to "android-demo", "tenant" to tenant.code),
+            metadata = mapOf("source" to "android-demo", "tenant" to tenant.code, "testSource" to "mobile-parity-2026-11"),
             locale = SophiLocale.TR,
-            enableDebugLogs = true,
+            enableDebugLogs = false,
         )
         configured.value = true
+        MerchantCart.onSnapshot = { Sophi.updateCart(it) }
         MerchantCart.push()
         DemoEventLog.log("configure(${tenant.code}, $environment, user=${externalUserId ?: "guest"})")
         return true
@@ -56,7 +58,7 @@ object DemoSophi {
         }
 
         override fun onError(error: SophiError) {
-            DemoEventLog.log("onError ${error::class.simpleName}: ${error.message}")
+            DemoEventLog.log("onError ${error::class.simpleName}" + (if (error is SophiError.Http) " HTTP ${error.status}" else ""))
         }
 
         /** Awaited: the SDK only reports success (and allows checkout) once the merchant cart accepted the items. */
@@ -64,7 +66,7 @@ object DemoSophi {
             DemoEventLog.log("onAddToCart ${items.joinToString { "${it.externalId}/${it.variantExternalId ?: "?"} x${it.quantity}" }}")
             val result = MerchantCart.add(items)
             result.onSuccess { DemoEventLog.log("cart acknowledged, snapshot pushed (${MerchantCart.lines.value.size} lines)") }
-                .onFailure { DemoEventLog.log("cart write FAILED: ${it.message}") }
+                .onFailure { DemoEventLog.log("cart write FAILED: ${it::class.simpleName}") }
             return result
         }
 
@@ -78,7 +80,7 @@ object DemoSophi {
         }
 
         override fun onOpenProductPage(url: String, product: SophiProductDetail?): Boolean {
-            DemoEventLog.log("onOpenProductPage ${product?.externalId ?: "?"} $url (left to the SDK browser handoff)")
+            DemoEventLog.log("onOpenProductPage (SDK browser handoff)")
             return false
         }
 

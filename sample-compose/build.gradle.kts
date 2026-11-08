@@ -17,6 +17,7 @@ fun key(name: String): String = "\"${props.getProperty(name, "")}\""
 android {
     namespace = "com.sophi.sample"
     compileSdk = 36
+    sourceSets.getByName("main").kotlin.srcDir("../shared/src/main/java")
 
     defaultConfig {
         applicationId = "com.sophi.sample"
@@ -52,6 +53,7 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

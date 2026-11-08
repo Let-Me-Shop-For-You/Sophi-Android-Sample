@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val configured = (application as SampleApplication).configured
+        binding.status.text = if (configured) "M&S · Development environment\nCart changes stay in this demo app." else "Add a development MNS_API_KEY to local.properties, then rebuild."
+        binding.fabSophi.isEnabled = configured
         binding.apply {
             fabSophi.setOnClickListener {
                 Sophi.start(this@MainActivity)

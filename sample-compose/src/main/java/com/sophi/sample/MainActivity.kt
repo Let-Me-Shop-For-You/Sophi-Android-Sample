@@ -68,17 +68,24 @@ private fun DemoHome() {
     val lines by MerchantCart.lines.collectAsState()
     val events by DemoEventLog.events.collectAsState()
     val configured by DemoSophi.configured.collectAsState()
-    val ready = tenant.hasKey && configured
+    var identityBusy by remember { mutableStateOf(false) }
+    val ready = tenant.hasKey && configured && !identityBusy
 
     /** Identity changes reconfigure the SDK, which drops its cart snapshot (BND-03): the merchant re-pushes its own. */
     fun changeIdentity(externalUserId: String?) {
+        if (identityBusy) return
+        identityBusy = true
         val previous = DemoTenants.rememberedUser(context)
         DemoTenants.rememberUser(context, externalUserId)
+        // Clear the old account cart before awaiting authentication; a failure can still leave
+        // the SDK configured for the replacement identity. Guest-to-account keeps its cart.
+        if (previous != null && previous != externalUserId) MerchantCart.clear()
         scope.launch {
-            val result = Sophi.setExternalUserId(externalUserId)
-            DemoEventLog.log("setExternalUserId(${externalUserId ?: "null"}) → ${result.fold({ "ok" }, { "failed: ${it.message}" })}")
-            // Another account (or sign-out) never inherits the previous account's cart; guest → account keeps the guest cart.
-            if (previous != null && previous != externalUserId) MerchantCart.clear() else MerchantCart.push()
+            try {
+                val result = Sophi.setExternalUserId(externalUserId)
+                DemoEventLog.log("setExternalUserId → ${result.fold({ "ok" }, { "failed: ${it::class.simpleName}" })}")
+                if (result.isSuccess) MerchantCart.push()
+            } finally { identityBusy = false }
         }
     }
 
@@ -94,6 +101,7 @@ private fun DemoHome() {
             DemoTenants.all.forEach { t ->
                 FilterChip(
                     selected = t.code == tenant.code,
+                    enabled = !identityBusy,
                     onClick = {
                         if (t.code == tenant.code) return@FilterChip
                         tenant = t
@@ -171,7 +179,7 @@ private fun Section(title: String) {
 }
 
 private fun log(command: String, result: Result<Unit>) {
-    DemoEventLog.log("$command → ${result.fold({ "queued/sent" }, { "rejected: ${it.message}" })}")
+    DemoEventLog.log("$command → ${result.fold({ "queued/sent" }, { "rejected: ${it::class.simpleName}" })}")
 }
 
 private const val MAX_VISIBLE_EVENTS = 40

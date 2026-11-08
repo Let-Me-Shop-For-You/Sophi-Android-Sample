@@ -1,6 +1,5 @@
 package com.sophi.sample
 
-import com.sophi.android.Sophi
 import com.sophi.android.data.model.SophiCart
 import com.sophi.android.data.model.SophiCartItem
 import com.sophi.android.data.model.SophiCartLine
@@ -14,7 +13,7 @@ import java.util.Currency
 import java.util.Date
 import java.util.Locale
 
-/** One merchant cart line, keyed by the merchant's product + variant ids (variant may be unknown). */
+/** One merchant cart line, keyed by the merchant's product + variant ids (both identifiers are required). */
 data class MerchantLine(
     val productId: String,
     val variantId: String,
@@ -37,6 +36,7 @@ data class MerchantLine(
 object MerchantCart {
     private val state = MutableStateFlow<List<MerchantLine>>(emptyList())
     val lines: StateFlow<List<MerchantLine>> = state
+    var onSnapshot: ((SophiCart) -> Unit)? = null
 
     /** Armed by the operator to rehearse a rejected write; consumed by the next add. */
     val failNextWrite = MutableStateFlow(false)
@@ -44,13 +44,16 @@ object MerchantCart {
     val total: Double get() = state.value.sumOf { (it.unitPrice ?: 0.0) * it.quantity }
     val currency: String? get() = state.value.firstNotNullOfOrNull { it.currency }
 
-    /** Simulated merchant write with latency. A missing variant id is accepted (the SDK can deliver none). */
+    /** Simulated merchant write with latency. Validate the entire batch before atomically applying it. */
     suspend fun add(items: List<SophiCartItem>): Result<Unit> {
         delay(WRITE_LATENCY_MILLIS)
         if (failNextWrite.compareAndSet(expect = true, update = false)) {
             return Result.failure(IllegalStateException("Demo merchant rejected the cart write"))
         }
-        state.update { current ->
+        if (items.any { it.externalId.isBlank() || it.variantExternalId.isNullOrBlank() || it.quantity <= 0 }) {
+            return Result.failure(IllegalArgumentException("Merchant product/SKU IDs and a positive quantity are required"))
+        }
+        try { state.update { current ->
             val merged = current.associateBy { it.key }.toMutableMap()
             items.forEach { item ->
                 val line = MerchantLine(
@@ -62,9 +65,11 @@ object MerchantCart {
                     unitPrice = item.unitPrice,
                     currency = item.currency,
                 )
-                merged[line.key] = merged[line.key]?.let { it.copy(quantity = it.quantity + line.quantity) } ?: line
+                merged[line.key] = merged[line.key]?.let { it.copy(quantity = Math.addExact(it.quantity, line.quantity)) } ?: line
             }
             merged.values.toList()
+        } } catch (overflow: ArithmeticException) {
+            return Result.failure(IllegalArgumentException("Cart quantity exceeds the supported range", overflow))
         }
         push()
         return Result.success(Unit)
@@ -82,14 +87,12 @@ object MerchantCart {
 
     /** Hands the whole cart to the SDK for `meta.cartInfo`; lines without a merchant variant id are not sendable. */
     fun push() {
-        if (!DemoSophi.configured.value) return
-        Sophi.updateCart(snapshot())
+        onSnapshot?.invoke(snapshot())
     }
 
     fun snapshot(): SophiCart = SophiCart(
         cartId = CART_ID,
         items = state.value
-            .filter { it.variantId.isNotBlank() }
             .map { SophiCartLine(productId = it.productId, variantId = it.variantId, quantity = it.quantity) },
     )
 
