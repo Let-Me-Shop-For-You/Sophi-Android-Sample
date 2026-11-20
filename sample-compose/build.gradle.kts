@@ -3,16 +3,23 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlinxSerialization)
 }
 
+// Tenant API keys live only in the gitignored local.properties (see local.properties.example);
+// a missing file must not break the build, it just leaves every tenant without a key.
 val props = Properties().apply {
-    load(rootProject.file("local.properties").inputStream())
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
 }
+
+fun key(name: String): String = "\"${props.getProperty(name, "")}\""
 
 android {
     namespace = "com.sophi.sample"
     compileSdk = 36
+    sourceSets.getByName("main").kotlin.srcDir("../shared/src/main/java")
+    // A plain checkout builds against system roots; the local launcher supplies its isolated test CA.
+    sourceSets.getByName("main").res.srcDir(if (providers.gradleProperty("sophiDemoLocalTls").orNull != "false" && rootProject.file("shared/generated/res/raw/sophi_demo_ca.crt").exists()) "../shared/generated/res" else "../shared/src/main/res")
 
     defaultConfig {
         applicationId = "com.sophi.sample"
@@ -22,6 +29,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SOPHI_ENV", key("SOPHI_ENV"))
+        buildConfigField("String", "VAKKO_API_KEY", key("VAKKO_API_KEY"))
+        buildConfigField("String", "MNS_API_KEY", key("MNS_API_KEY"))
+        buildConfigField("String", "KIKO_API_KEY", key("KIKO_API_KEY"))
+        buildConfigField("String", "BOYNER_API_KEY", key("BOYNER_API_KEY"))
+        buildConfigField("String", "BEYMEN_API_KEY", key("BEYMEN_API_KEY"))
     }
 
     buildTypes {
@@ -41,6 +55,9 @@ android {
 }
 
 dependencies {
+    implementation("com.usesophi:sophi-event:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    testImplementation("junit:junit:4.13.2")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -50,8 +67,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // navigation
-    implementation(libs.androidx.navigation.compose)
 
     // Sophi Android SDK
     implementation(libs.sophi.android)

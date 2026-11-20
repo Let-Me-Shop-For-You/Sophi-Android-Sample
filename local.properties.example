@@ -1,0 +1,10 @@
+# Copy to local.properties (gitignored). Never commit real keys.
+sdk.dir=/path/to/Android/sdk
+# dev | prod
+SOPHI_ENV=dev
+# Widget API keys per test tenant (dev keys from the tenant's widget configuration)
+VAKKO_API_KEY=
+MNS_API_KEY=
+KIKO_API_KEY=
+BOYNER_API_KEY=
+BEYMEN_API_KEY=

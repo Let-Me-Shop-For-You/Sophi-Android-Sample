@@ -1,12 +1,15 @@
 package com.sophi.sample
 
 import android.os.Bundle
+import android.content.Intent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.sophi.android.Sophi
 import com.sophi.sample.databinding.ActivityMainBinding
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,6 +26,15 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val host = application as SampleApplication
+        if (intent.getBooleanExtra("sophi_local_demo", false) && !host.localDemo) host.configure(true)
+        lifecycleScope.launch { host.ready.collect { ready ->
+            binding.status.text = if (ready) (if (host.localDemo) "Local chat + events\nSynthetic data; no real orders." else "M&S · Development environment") else "Preparing chat + events…"
+            binding.fabSophi.isEnabled = ready; binding.events.isEnabled = ready
+        } }
+        binding.events.setOnClickListener { startActivity(Intent(this, DemoEventsActivity::class.java)) }
+        binding.local.setOnClickListener { host.configure(true) }
+        binding.development.setOnClickListener { host.configure(false) }
         binding.apply {
             fabSophi.setOnClickListener {
                 Sophi.start(this@MainActivity)

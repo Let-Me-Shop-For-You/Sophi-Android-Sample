@@ -12,20 +12,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Home"
+        android:text="M&amp;S · Sophi Views demo"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/status"
+        android:layout_margin="24dp"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to the Home Screen"
+        android:text="Development integration"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout android:id="@+id/controls" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@id/status" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <Button android:id="@+id/events" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Events &amp; delivery" />
+        <Button android:id="@+id/local" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Use local demo" />
+        <Button android:id="@+id/development" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Use M&amp;S development key" />
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_sophi"
@@ -33,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:clickable="true"
-        android:contentDescription="Sophi Action"
+        android:contentDescription="Open M&amp;S assistant"
         android:text="Sophi"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
