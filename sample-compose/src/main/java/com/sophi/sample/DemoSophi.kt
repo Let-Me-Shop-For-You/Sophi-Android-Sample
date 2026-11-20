@@ -10,12 +10,18 @@ import com.sophi.android.data.model.SophiCartItem
 import com.sophi.android.data.model.SophiProductDetail
 import com.sophi.android.data.model.SophiSessionInfo
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * The merchant side of the integration: one configure call per tenant, one listener that owns
  * the cart acknowledgement, pushes cart snapshots back and routes checkout to the demo screen.
  */
 object DemoSophi {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val configurationLock = Mutex()
+    private var generation = 0L
 
     /** True once a tenant with a key has been configured; the UI gates every SDK call on it. */
     val configured = MutableStateFlow(false)
@@ -23,18 +29,26 @@ object DemoSophi {
     /** Returns false when the tenant has no key: nothing is configured and the UI keeps the chat closed. */
     fun configure(context: Context, tenant: DemoTenant, externalUserId: String? = null): Boolean {
         val app = context.applicationContext
+        generation++; val current = generation
+        configured.value = false; DemoTracking.invalidate()
         MerchantCart.onSnapshot = null
         val previous = DemoTenants.remembered(app)
         DemoTenants.remember(app, tenant)
         // A merchant cart belongs to one store: switching tenant starts from an empty one.
-        if (previous.code != tenant.code) MerchantCart.clear()
+        if (previous.code != tenant.code) { MerchantCart.clear(); Sophi.reset() }
         if (!tenant.hasKey) {
             configured.value = false
             DemoEventLog.log("no API key for ${tenant.code} in local.properties; SDK not configured")
             return false
         }
-        val environment = DemoTenants.environment
-        Sophi.configure(
+        val environment = DemoTenants.environmentFor(tenant)
+        scope.launch { configurationLock.withLock {
+          if (current != generation) return@withLock
+          try {
+            DemoTracking.configure(app, tenant.apiKey, "https://" + environment.baseUrl, tenant.code, externalUserId)
+            if (current != generation) return@withLock
+            DemoTracking.shopperChanged = { DemoTenants.rememberUser(app, it) }
+            Sophi.configure(
             context = app,
             apiKey = tenant.apiKey,
             environment = environment,
@@ -42,13 +56,16 @@ object DemoSophi {
             listener = DemoListener(app),
             externalUserId = externalUserId,
             metadata = mapOf("source" to "android-demo", "tenant" to tenant.code, "testSource" to "mobile-parity-2026-11"),
-            locale = SophiLocale.TR,
+            locale = if (tenant.code == "local") SophiLocale.EN else SophiLocale.TR,
             enableDebugLogs = false,
         )
         configured.value = true
         MerchantCart.onSnapshot = { Sophi.updateCart(it) }
         MerchantCart.push()
         DemoEventLog.log("configure(${tenant.code}, $environment, user=${externalUserId ?: "guest"})")
+          } catch (cancelled: CancellationException) { throw cancelled }
+          catch (_: Exception) { DemoEventLog.log("Unable to configure chat + events") }
+        } }
         return true
     }
 
@@ -75,6 +92,7 @@ object DemoSophi {
         }
 
         override fun onCheckout() {
+            DemoTracking.checkout()
             DemoEventLog.log("onCheckout → demo checkout screen")
             app.startActivity(Intent(app, DemoCheckoutActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }

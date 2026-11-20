@@ -54,8 +54,7 @@ class DemoCheckoutActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxWidth(),
                         enabled = lines.isNotEmpty(),
                         onClick = {
-                            DemoEventLog.log("demo order placed (${lines.size} lines, total ${formatAmount(total, currency)}) — no payment")
-                            MerchantCart.clear()
+                            DemoTracking.placeDemoOrder()
                             finish()
                         },
                     ) { Text("Place demo order") }

@@ -37,6 +37,10 @@ object MerchantCart {
     private val state = MutableStateFlow<List<MerchantLine>>(emptyList())
     val lines: StateFlow<List<MerchantLine>> = state
     var onSnapshot: ((SophiCart) -> Unit)? = null
+    var onAccepted: ((List<SophiCartItem>, List<MerchantLine>) -> Unit)? = null
+    var onRemoved: ((MerchantLine, List<MerchantLine>) -> Unit)? = null
+    private var revision = 0L
+    private val lock = Any()
 
     /** Armed by the operator to rehearse a rejected write; consumed by the next add. */
     val failNextWrite = MutableStateFlow(false)
@@ -46,11 +50,14 @@ object MerchantCart {
 
     /** Simulated merchant write with latency. Validate the entire batch before atomically applying it. */
     suspend fun add(items: List<SophiCartItem>): Result<Unit> {
+        val captured = synchronized(lock) { revision }
         delay(WRITE_LATENCY_MILLIS)
+        synchronized(lock) {
+        if (captured != revision) return Result.failure(kotlinx.coroutines.CancellationException("Shopper or cart changed"))
         if (failNextWrite.compareAndSet(expect = true, update = false)) {
             return Result.failure(IllegalStateException("Demo merchant rejected the cart write"))
         }
-        if (items.any { it.externalId.isBlank() || it.variantExternalId.isNullOrBlank() || it.quantity <= 0 }) {
+        if (items.isEmpty() || items.any { it.externalId.isBlank() || it.variantExternalId.isNullOrBlank() || it.quantity <= 0 }) {
             return Result.failure(IllegalArgumentException("Merchant product/SKU IDs and a positive quantity are required"))
         }
         try { state.update { current ->
@@ -72,22 +79,31 @@ object MerchantCart {
             return Result.failure(IllegalArgumentException("Cart quantity exceeds the supported range", overflow))
         }
         push()
+        // Analytics observes the accepted write; an observer failure cannot roll it back.
+        try { onAccepted?.invoke(items, state.value) }
+        catch (_: Exception) { DemoEventLog.log("Cart accepted; event observer failed") }
         return Result.success(Unit)
+        }
     }
 
-    fun remove(key: String) {
+    fun remove(key: String): Unit = synchronized(lock) {
+        val removed = state.value.firstOrNull { it.key == key } ?: return
         state.update { current -> current.filterNot { it.key == key } }
         push()
+        try { onRemoved?.invoke(removed, state.value) }
+        catch (_: Exception) { DemoEventLog.log("Cart updated; event observer failed") }
     }
 
-    fun clear() {
+    fun clear() = synchronized(lock) {
+        revision++
         state.update { emptyList() }
         push()
     }
 
     /** Hands the whole cart to the SDK for `meta.cartInfo`; lines without a merchant variant id are not sendable. */
     fun push() {
-        onSnapshot?.invoke(snapshot())
+        try { onSnapshot?.invoke(snapshot()) }
+        catch (_: Exception) { DemoEventLog.log("Cart accepted; SDK snapshot update failed") }
     }
 
     fun snapshot(): SophiCart = SophiCart(

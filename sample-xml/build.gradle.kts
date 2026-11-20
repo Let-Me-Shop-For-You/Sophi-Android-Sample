@@ -13,6 +13,7 @@ android {
     namespace = "com.sophi.sample"
     compileSdk = 36
     sourceSets.getByName("main").kotlin.srcDir("../shared/src/main/java")
+    sourceSets.getByName("main").res.srcDir(if (providers.gradleProperty("sophiDemoLocalTls").orNull != "false" && rootProject.file("shared/generated/res/raw/sophi_demo_ca.crt").exists()) "../shared/generated/res" else "../shared/src/main/res")
 
     defaultConfig {
         applicationId = "com.sophi.sample.xml"
@@ -42,6 +43,8 @@ android {
 }
 
 dependencies {
+    implementation("com.usesophi:sophi-event:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     testImplementation("junit:junit:4.13.2")
     implementation(libs.androidx.core.ktx)

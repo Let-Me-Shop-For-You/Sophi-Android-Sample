@@ -49,6 +49,10 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra("sophi_local_demo", false) && DemoTenants.remembered(this).code != "local") {
+            DemoTenants.rememberUser(this, null)
+            DemoSophi.configure(this, DemoTenants.byCode("local"))
+        }
         enableEdgeToEdge()
         setContent { SophiAndroidTheme { DemoHome() } }
     }
@@ -82,9 +86,10 @@ private fun DemoHome() {
         if (previous != null && previous != externalUserId) MerchantCart.clear()
         scope.launch {
             try {
-                val result = Sophi.setExternalUserId(externalUserId)
-                DemoEventLog.log("setExternalUserId → ${result.fold({ "ok" }, { "failed: ${it::class.simpleName}" })}")
-                if (result.isSuccess) MerchantCart.push()
+                DemoTracking.shopper(externalUserId)
+                MerchantCart.push()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled
+            } catch (_: Exception) { DemoEventLog.log("Shopper update failed")
             } finally { identityBusy = false }
         }
     }
@@ -94,7 +99,8 @@ private fun DemoHome() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text("Sophi merchant demo", style = MaterialTheme.typography.headlineSmall)
-        Text("Environment: ${DemoTenants.environment.baseUrl}", style = MaterialTheme.typography.bodySmall)
+        Text("Environment: ${DemoTenants.environmentFor(tenant).baseUrl}", style = MaterialTheme.typography.bodySmall)
+        Button(onClick = { context.startActivity(Intent(context, DemoEventsActivity::class.java)) }, enabled = ready) { Text("Events & delivery") }
 
         Section("Tenant")
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
@@ -121,11 +127,8 @@ private fun DemoHome() {
             OutlinedButton(
                 enabled = ready,
                 onClick = {
-                    Sophi.reset()
                     userId = ""
-                    DemoTenants.rememberUser(context, null)
-                    MerchantCart.clear()
-                    DemoEventLog.log("reset() — identity and merchant cart cleared")
+                    changeIdentity(null)
                 },
             ) { Text("Reset") }
         }
@@ -160,7 +163,7 @@ private fun DemoHome() {
             Switch(checked = failNext, onCheckedChange = { MerchantCart.failNextWrite.value = it })
             Text("Reject the next cart write")
             Spacer(Modifier.weight(1f))
-            Button(onClick = { context.startActivity(Intent(context, DemoCheckoutActivity::class.java)) }, enabled = lines.isNotEmpty()) { Text("Checkout") }
+            Button(onClick = { DemoTracking.checkout(); context.startActivity(Intent(context, DemoCheckoutActivity::class.java)) }, enabled = lines.isNotEmpty()) { Text("Checkout") }
         }
 
         Section("Event log")

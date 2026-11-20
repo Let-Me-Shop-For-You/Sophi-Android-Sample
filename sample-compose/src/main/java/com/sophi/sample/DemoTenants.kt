@@ -16,6 +16,7 @@ data class DemoTenant(val code: String, val label: String, val apiKey: String, v
 
 object DemoTenants {
     val all: List<DemoTenant> = listOf(
+        DemoTenant("local", "Local chat + events", "demo-android-compose"),
         // Vakko doubles as the branding example: host assets, texts and a colour override on top of the tenant theme.
         DemoTenant(
             "vakko", "Vakko", BuildConfig.VAKKO_API_KEY,
@@ -41,6 +42,9 @@ object DemoTenants {
                 SophiEnvironment.Dev
             }
         }
+
+    fun environmentFor(tenant: DemoTenant): SophiEnvironment = if (tenant.code == "local")
+        SophiEnvironment.Custom(DemoTracking.ORIGIN, DemoTracking.ORIGIN) else environment
 
     fun byCode(code: String?): DemoTenant = all.firstOrNull { it.code == code } ?: all.first()
 
