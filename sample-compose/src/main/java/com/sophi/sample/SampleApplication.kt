@@ -7,6 +7,7 @@ import com.sophi.android.Sophi
 import com.sophi.android.config.SophiAssets
 import com.sophi.android.config.SophiColors
 import com.sophi.android.config.SophiConfig
+import com.sophi.android.config.SophiEnvironment
 import com.sophi.android.config.SophiTexts
 
 class SampleApplication : Application() {
@@ -16,10 +17,10 @@ class SampleApplication : Application() {
     }
 
     private fun initSophi() {
-        Sophi.init(
-            baseUrl = "your base url",
-            apiKey = "your api key",
-            clientId = "your client id",
+        Sophi.configure(
+            context = this,
+            apiKey = BuildConfig.SOPHI_API_KEY,
+            environment = SophiEnvironment.Dev,
             config = SophiConfig(
                 assets = SophiAssets(
                     toolbarBrandImage = R.drawable.ic_ai,
