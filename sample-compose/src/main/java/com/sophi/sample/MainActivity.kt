@@ -4,83 +4,44 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.sophi.android.Sophi
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.sophi.sample.feature.EmbeddedChatScreen
+import com.sophi.sample.feature.HomeScreen
+import com.sophi.sample.feature.LaunchScreen
 import com.sophi.sample.ui.theme.SophiAndroidTheme
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface Route {
+    @Serializable data object Home : Route
+    @Serializable data object Launch : Route
+    @Serializable data class EmbeddedChat(val message: String? = null, val productId: String? = null) : Route
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SophiAndroidTheme {
-                val context = LocalContext.current
-                HomeContent(
-                    onSophiClick = {
-                        Sophi.start(context)
-                    }
-                )
-            }
+            SophiAndroidTheme { SampleNavHost() }
         }
     }
 }
 
 @Composable
-private fun HomeContent(
-    onSophiClick: () -> Unit,
-) {
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .systemBarsPadding(),
-        topBar = {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = "Home",
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.padding(16.dp),
-                onClick = { onSophiClick() },
-            ) {
-                Text(
-                    text = "Sophi",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Medium,
-                    )
-                )
-            }
-        }
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = "Welcome to the Home Screen!",
-            )
+private fun SampleNavHost() {
+    val navController = rememberNavController()
+    val back: () -> Unit = { if (navController.previousBackStackEntry != null) navController.popBackStack() }
+    NavHost(navController, startDestination = Route.Home) {
+        composable<Route.Home> { HomeScreen(onOpen = { navController.navigate(it) }) }
+        composable<Route.Launch> { LaunchScreen(onBack = back) }
+        composable<Route.EmbeddedChat> { entry ->
+            val route = entry.toRoute<Route.EmbeddedChat>()
+            EmbeddedChatScreen(route.message, route.productId, onBack = back)
         }
     }
 }
