@@ -1,7 +1,10 @@
 package com.sophi.sample
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
+import androidx.core.net.toUri
 import com.sophi.android.Sophi
 import com.sophi.android.config.SophiAssets
 import com.sophi.android.config.SophiColors
@@ -55,8 +58,7 @@ object SampleSophi {
             environment = SophiEnvironment.Dev,
             config = SampleSettings.preset.toConfig(),
             listener = SampleListener(appContext),
-            // Keeps a signed-in shopper when the catalog reconfigures for another preset.
-            externalUserId = Sophi.currentSessionInfo()?.externalUserId,
+            externalUserId = SignedInUser.load(appContext),
             metadata = mapOf("appVersion" to "1.0"),
             userName = SampleSettings.userName,
             locale = SampleSettings.locale,
@@ -96,10 +98,22 @@ private class SampleListener(private val context: Context) : SophiListener {
         EventLog.add("onCheckout")
     }
 
+    // Return true only after the app navigated itself; false lets the SDK open the page.
     override fun onOpenProductPage(url: String, product: SophiProductDetail?): Boolean {
-        val handled = SampleSettings.hostOpensProductPage
-        EventLog.add("onOpenProductPage", if (handled) "uygulama açtı: $url" else "SDK açıyor: $url")
-        return handled
+        if (!SampleSettings.hostOpensProductPage) {
+            EventLog.add("onOpenProductPage", "SDK açıyor: $url")
+            return false
+        }
+        // A real app opens its own product screen here; the sample hands the URL to the browser.
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return try {
+            context.startActivity(intent)
+            EventLog.add("onOpenProductPage", "uygulama açtı: $url")
+            true
+        } catch (expected: ActivityNotFoundException) {
+            EventLog.add("onOpenProductPage", "açılamadı, SDK açıyor: $url")
+            false
+        }
     }
 
     override fun onClose() {

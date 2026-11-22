@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.sophi.android.Sophi
 import com.sophi.android.data.model.SophiSessionInfo
 import com.sophi.sample.SampleSettings
+import com.sophi.sample.SignedInUser
 import kotlinx.coroutines.launch
 
 @Composable
@@ -44,6 +45,10 @@ fun IdentityScreen(onBack: () -> Unit) {
         status = result.fold({ "$action: tamam" }, { "$action: ${it.javaClass.simpleName} (${it.message})" })
         refresh()
     }
+    val forgetName = {
+        SampleSettings.userName = null
+        name = ""
+    }
     val fieldModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
 
     FeatureScreen(
@@ -56,10 +61,24 @@ fun IdentityScreen(onBack: () -> Unit) {
         Row(fieldModifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
                 enabled = customerId.isNotBlank(),
-                onClick = { scope.launch { report("Giriş", Sophi.setExternalUserId(customerId.trim())) } },
+                onClick = {
+                    val id = customerId.trim()
+                    scope.launch {
+                        val result = Sophi.setExternalUserId(id)
+                        if (result.isSuccess) {
+                            // Another account: the SDK drops the previous shopper's name, so does the app.
+                            val previous = SignedInUser.load(context)
+                            if (previous != null && previous != id) forgetName()
+                            SignedInUser.save(context, id)
+                        }
+                        report("Giriş", result)
+                    }
+                },
             ) { Text("Giriş yap") }
             OutlinedButton(onClick = {
                 Sophi.reset()
+                SignedInUser.save(context, null)
+                forgetName()
                 status = "Çıkış: kimlik temizlendi"
                 refresh()
             }) { Text("Çıkış yap (reset)") }
