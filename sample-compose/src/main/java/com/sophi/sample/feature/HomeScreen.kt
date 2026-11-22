@@ -38,6 +38,8 @@ private val entries = listOf(
     ),
     HomeEntry("Görünüm", "SophiConfig: renk, metin, logo, avatar, kapatma butonu ve dil.", listOf("" to Route.Appearance)),
     HomeEntry("Kimlik", "Giriş, çıkış, kullanıcı adı, kimliğin cihazda tutulması ve oturum bilgisi.", listOf("" to Route.Identity)),
+    HomeEntry("Ticaret", "Sepet, favori, checkout ve ürün sayfası callback'leri; updateCart, updateFavorite.", listOf("" to Route.Commerce)),
+    HomeEntry("Olaylar", "SophiListener'a gelen her callback, geliş sırasıyla.", listOf("" to Route.Events)),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

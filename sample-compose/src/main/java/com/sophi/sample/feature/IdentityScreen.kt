@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.sophi.android.Sophi
 import com.sophi.android.data.model.SophiSessionInfo
@@ -70,12 +72,15 @@ fun IdentityScreen(onBack: () -> Unit) {
             status = "Ad uygulandı"
         }, modifier = fieldModifier) { Text("setUserName") }
 
-        Row(fieldModifier, verticalAlignment = Alignment.CenterVertically) {
-            Text("Kimliği cihazda tut", modifier = Modifier.weight(1f))
-            Switch(checked = SampleSettings.persistIdentity, onCheckedChange = {
+        Row(
+            fieldModifier.toggleable(value = SampleSettings.persistIdentity, role = Role.Switch) {
                 SampleSettings.persistIdentity = it
                 Sophi.setIdentityPersistenceEnabled(it)
-            })
+            },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Kimliği cihazda tut", modifier = Modifier.weight(1f))
+            Switch(checked = SampleSettings.persistIdentity, onCheckedChange = null)
         }
 
         Row(fieldModifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

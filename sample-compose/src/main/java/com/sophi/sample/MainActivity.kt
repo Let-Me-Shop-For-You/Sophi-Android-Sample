@@ -11,6 +11,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.sophi.sample.feature.EmbeddedChatScreen
 import com.sophi.sample.feature.HomeScreen
+import com.sophi.sample.feature.EventsScreen
+import com.sophi.sample.feature.CommerceScreen
 import com.sophi.sample.feature.IdentityScreen
 import com.sophi.sample.feature.AppearanceScreen
 import com.sophi.sample.feature.LaunchScreen
@@ -23,6 +25,8 @@ sealed interface Route {
     @Serializable data object Launch : Route
     @Serializable data object Appearance : Route
     @Serializable data object Identity : Route
+    @Serializable data object Commerce : Route
+    @Serializable data object Events : Route
     @Serializable data class EmbeddedChat(val message: String? = null, val productId: String? = null) : Route
 }
 
@@ -45,6 +49,8 @@ private fun SampleNavHost() {
         composable<Route.Launch> { LaunchScreen(onBack = back) }
         composable<Route.Appearance> { AppearanceScreen(onBack = back) }
         composable<Route.Identity> { IdentityScreen(onBack = back) }
+        composable<Route.Commerce> { CommerceScreen(onBack = back) }
+        composable<Route.Events> { EventsScreen(onBack = back) }
         composable<Route.EmbeddedChat> { entry ->
             val route = entry.toRoute<Route.EmbeddedChat>()
             EmbeddedChatScreen(route.message, route.productId, onBack = back)
