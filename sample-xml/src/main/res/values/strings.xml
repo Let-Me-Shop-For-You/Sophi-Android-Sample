@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Sophi XML Sample</string>
+    <string name="home_title">Sophi XML örneği</string>
+    <string name="home_description">Sophi.start sohbeti SDK\'nın kendi ekranında açar. SophiChatFragment ise sohbeti uygulamanın kendi ekranına gömer.</string>
+    <string name="action_start">Tam ekran aç</string>
+    <string name="action_start_message">Mesajla aç</string>
+    <string name="action_start_product">Ürünle aç</string>
+    <string name="action_embedded">Gömülü aç (SophiChatFragment)</string>
+    <string name="embedded_title">Uygulamanın toolbar\'ı</string>
+    <string name="action_back">Geri</string>
 </resources>

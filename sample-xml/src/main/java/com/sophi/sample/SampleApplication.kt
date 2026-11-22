@@ -25,18 +25,15 @@ class SampleApplication : Application() {
             apiKey = BuildConfig.SOPHI_API_KEY,
             environment = SophiEnvironment.Dev,
             config = SophiConfig(
-                assets = SophiAssets(
-                    toolbarBrandImage = R.drawable.ic_ai,
-                    assistantAvatarImage = R.drawable.ic_vakko,
-                ),
+                assets = SophiAssets(toolbarBrandImage = R.drawable.ic_ai),
                 texts = SophiTexts(
-                    toolbarLabel = "Vakko Asistan",
+                    toolbarLabel = "Demo Mağaza",
                     toolbarDescription = "Size nasıl yardımcı olabilirim?",
-                    assistantLabel = "Vakko Asistan",
+                    assistantLabel = "Demo Asistan",
                     inputPlaceholderText = "Herhangi bir şey sorun",
                 ),
                 colors = SophiColors(
-                    senderBubbleBackgroundColor = "#C9A970".toColorInt(),
+                    senderBubbleBackgroundColor = "#1AC9A970".toColorInt(),
                 ),
                 showAssistantAvatar = true,
                 showAssistantLabel = true,
@@ -61,7 +58,6 @@ class SampleApplication : Application() {
                 }
             },
             enableDebugLogs = true,
-            externalUserId = "sample-user-id",
         )
     }
 
