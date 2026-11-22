@@ -39,7 +39,8 @@ fun CommerceScreen(onBack: () -> Unit) {
     FeatureScreen(
         title = "Ticaret",
         description = "Sepete ekleme onAddToCart ile uygulamaya gelir ve beklenir: Result.failure dönerse SDK hatayı gösterir ve " +
-            "checkout'u kilitler. updateCart uygulamanın sepetini bir sonraki mesaja ekler. Gelen her callback Olaylar ekranında görünür.",
+            "checkout'u kilitler. updateCart uygulamanın sepetini bir sonraki mesaja ekler; configure, reset veya hesap değişiminden " +
+            "sonra sepet düşer ve tekrar gönderilmelidir. Gelen her callback Olaylar ekranında görünür.",
         onBack = onBack,
     ) {
         Button(onClick = {

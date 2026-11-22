@@ -37,7 +37,8 @@ fun IdentityScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var customerId by rememberSaveable { mutableStateOf("") }
-    var name by rememberSaveable { mutableStateOf(SampleSettings.userName.orEmpty()) }
+    var name by remember { mutableStateOf(SampleSettings.userName.orEmpty()) }
+    var signingIn by remember { mutableStateOf(false) }
     var status by rememberSaveable { mutableStateOf("") }
     var session by remember { mutableStateOf(Sophi.currentSessionInfo()) }
     val refresh = { session = Sophi.currentSessionInfo() }
@@ -60,11 +61,16 @@ fun IdentityScreen(onBack: () -> Unit) {
         OutlinedTextField(customerId, { customerId = it }, label = { Text("Müşteri id") }, singleLine = true, modifier = fieldModifier)
         Row(fieldModifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
-                enabled = customerId.isNotBlank(),
+                enabled = customerId.isNotBlank() && !signingIn,
                 onClick = {
                     val id = customerId.trim()
+                    signingIn = true
                     scope.launch {
-                        val result = Sophi.setExternalUserId(id)
+                        val result = try {
+                            Sophi.setExternalUserId(id)
+                        } finally {
+                            signingIn = false
+                        }
                         if (result.isSuccess) {
                             // Another account: the SDK drops the previous shopper's name, so does the app.
                             val previous = SignedInUser.load(context)

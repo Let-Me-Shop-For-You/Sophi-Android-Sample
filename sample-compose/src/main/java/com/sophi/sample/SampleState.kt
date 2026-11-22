@@ -20,12 +20,13 @@ const val DEMO_PRODUCT_ID = "12345"
 data class SampleEvent(val time: String, val name: String, val detail: String)
 
 object EventLog {
+    private const val MAX_EVENTS = 200
     private val mutableEvents = MutableStateFlow<List<SampleEvent>>(emptyList())
     val events: StateFlow<List<SampleEvent>> = mutableEvents.asStateFlow()
 
     fun add(name: String, detail: String = "") {
         val time = SimpleDateFormat("HH:mm:ss", Locale.ROOT).format(Date())
-        mutableEvents.update { listOf(SampleEvent(time, name, detail)) + it }
+        mutableEvents.update { (listOf(SampleEvent(time, name, detail)) + it).take(MAX_EVENTS) }
     }
 
     fun clear() {

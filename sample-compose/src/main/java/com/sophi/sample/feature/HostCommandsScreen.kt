@@ -23,15 +23,15 @@ import com.sophi.sample.DEMO_PRODUCT_ID
 import kotlinx.coroutines.launch
 
 private const val OUTFIT_REPLY_EXAMPLE =
-    "// outfit: Sophi'nin gösterdiği bir SophiOutfit (recommendationId > 0)\n" +
-        "Sophi.sendOutfitReply(\"Bu kombine ayakkabı öner\", outfit)"
+    "// outfit: backend'in verdiği recommendationId (> 0) ile oluşturulan bir SophiOutfit\n" +
+        "Sophi.sendOutfitReply(\"Bu kombine uygun ayakkabı öner\", outfit)"
 
 @Composable
 fun HostCommandsScreen(onBack: () -> Unit) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val run: (String, () -> Result<Unit>) -> Unit = { label, command ->
-        val message = command().fold({ "$label: gönderildi" }, { "$label: ${it.javaClass.simpleName}" })
+        val message = command().fold({ "$label: kabul edildi" }, { "$label: ${it.javaClass.simpleName}" })
         scope.launch {
             snackbar.currentSnackbarData?.dismiss()
             snackbar.showSnackbar(message)

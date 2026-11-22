@@ -1,5 +1,6 @@
 package com.sophi.sample.feature
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -34,7 +35,8 @@ fun EmbeddedChatScreen(
         },
     ) { innerPadding ->
         SophiChat(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            // consumeWindowInsets: the chat must not add the navigation bar again above the keyboard.
+            modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding),
             onClose = onBack,
             initialMessage = initialMessage,
             externalProductId = externalProductId,

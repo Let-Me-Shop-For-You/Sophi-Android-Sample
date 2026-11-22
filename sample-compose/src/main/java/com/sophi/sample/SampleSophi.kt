@@ -59,11 +59,11 @@ object SampleSophi {
             config = SampleSettings.preset.toConfig(),
             listener = SampleListener(appContext),
             externalUserId = SignedInUser.load(appContext),
-            metadata = mapOf("appVersion" to "1.0"),
+            metadata = mapOf("appVersion" to BuildConfig.VERSION_NAME),
             userName = SampleSettings.userName,
             locale = SampleSettings.locale,
             persistIdentity = SampleSettings.persistIdentity,
-            enableDebugLogs = true,
+            enableDebugLogs = BuildConfig.DEBUG,
         )
     }
 }
@@ -75,7 +75,7 @@ private class SampleListener(private val context: Context) : SophiListener {
     }
 
     override fun onError(error: SophiError) {
-        EventLog.add("onError", error.javaClass.simpleName)
+        EventLog.add("onError", "${error.javaClass.simpleName}: ${error.message}")
     }
 
     // A real app writes the items to its own cart here and returns the result.

@@ -47,7 +47,7 @@ private fun SampleNavHost() {
     val navController = rememberNavController()
     val back: () -> Unit = { if (navController.previousBackStackEntry != null) navController.popBackStack() }
     NavHost(navController, startDestination = Route.Home) {
-        composable<Route.Home> { HomeScreen(onOpen = { navController.navigate(it) }) }
+        composable<Route.Home> { HomeScreen(onOpen = { navController.navigate(it) { launchSingleTop = true } }) }
         composable<Route.Launch> { LaunchScreen(onBack = back) }
         composable<Route.Appearance> { AppearanceScreen(onBack = back) }
         composable<Route.Identity> { IdentityScreen(onBack = back) }

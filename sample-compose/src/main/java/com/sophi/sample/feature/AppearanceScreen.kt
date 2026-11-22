@@ -29,7 +29,8 @@ fun AppearanceScreen(onBack: () -> Unit) {
     FeatureScreen(
         title = "Görünüm",
         description = "Görünüm Sophi.configure'a verilen SophiConfig ile belirlenir; null bırakılan her alan tenant temasından gelir. " +
-            "Bir preset seçince configure yeni config ile tekrar çağrılır ve açık sohbetler kapanır. Dil ise setLocale ile anında değişir.",
+            "Bir preset seçince configure yeni config ile tekrar çağrılır: önceki yapılandırmaya bağlı sohbet ekranları kapanır, " +
+            "sonraki açılış yeni görünümle gelir. Dil ise setLocale ile anında değişir.",
         onBack = onBack,
     ) {
         Text("Preset", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(horizontal = 16.dp))
@@ -38,6 +39,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
                 Modifier
                     .fillMaxWidth()
                     .selectable(selected = SampleSettings.preset == preset) {
+                        if (SampleSettings.preset == preset) return@selectable
                         SampleSettings.preset = preset
                         SampleSophi.configure(context)
                         EventLog.add("configure", "preset=${preset.name}")

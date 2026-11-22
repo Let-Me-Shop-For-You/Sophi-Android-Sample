@@ -40,7 +40,7 @@ private val entries = listOf(
     HomeEntry("Kimlik", "Giriş, çıkış, kullanıcı adı, kimliğin cihazda tutulması ve oturum bilgisi.", listOf("" to Route.Identity)),
     HomeEntry("Ticaret", "Sepet, favori, checkout ve ürün sayfası callback'leri; updateCart, updateFavorite.", listOf("" to Route.Commerce)),
     HomeEntry("Host komutları", "Uygulamadan sohbete mesaj, ürün ve geçmiş komutları; gömülü sohbetle birlikte.", listOf("" to Route.HostCommands)),
-    HomeEntry("Olaylar", "SophiListener'a gelen her callback, geliş sırasıyla.", listOf("" to Route.Events)),
+    HomeEntry("Olaylar", "SophiListener'a gelen her callback, en yenisi en üstte.", listOf("" to Route.Events)),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

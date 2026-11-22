@@ -3,6 +3,7 @@ package com.sophi.sample.feature
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -46,7 +47,7 @@ fun FeatureScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
-        val base = Modifier.fillMaxSize().padding(innerPadding)
+        val base = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
         Column(
             modifier = if (scrollable) base.verticalScroll(rememberScrollState()) else base,
             verticalArrangement = Arrangement.spacedBy(12.dp),

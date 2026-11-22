@@ -57,7 +57,7 @@ class SampleApplication : Application() {
                     toast("Sophi kapatıldı")
                 }
             },
-            enableDebugLogs = true,
+            enableDebugLogs = BuildConfig.DEBUG,
         )
     }
 

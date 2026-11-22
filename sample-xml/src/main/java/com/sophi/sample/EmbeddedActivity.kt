@@ -19,7 +19,9 @@ class EmbeddedActivity : AppCompatActivity() {
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            // The chat lifts itself above the keyboard; the root only keeps it off the navigation bar.
+            val keyboardOpen = insets.isVisible(WindowInsetsCompat.Type.ime())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, if (keyboardOpen) 0 else systemBars.bottom)
             insets
         }
 
