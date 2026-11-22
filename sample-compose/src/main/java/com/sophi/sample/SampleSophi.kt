@@ -58,8 +58,9 @@ object SampleSophi {
             // Keeps a signed-in shopper when the catalog reconfigures for another preset.
             externalUserId = Sophi.currentSessionInfo()?.externalUserId,
             metadata = mapOf("appVersion" to "1.0"),
+            userName = SampleSettings.userName,
             locale = SampleSettings.locale,
-            persistIdentity = true,
+            persistIdentity = SampleSettings.persistIdentity,
             enableDebugLogs = true,
         )
     }

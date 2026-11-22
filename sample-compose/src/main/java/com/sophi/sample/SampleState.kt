@@ -34,6 +34,8 @@ object EventLog {
 object SampleSettings {
     var preset by mutableStateOf(AppearancePreset.Default)
     var locale by mutableStateOf(SophiLocale.TR)
+    var userName by mutableStateOf<String?>(null)
+    var persistIdentity by mutableStateOf(true)
     var cartWriteFails by mutableStateOf(false)
     var hostOpensProductPage by mutableStateOf(false)
 }
