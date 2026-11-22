@@ -36,6 +36,7 @@ private val entries = listOf(
             "Ürünle" to Route.EmbeddedChat(productId = DEMO_PRODUCT_ID),
         ),
     ),
+    HomeEntry("Görünüm", "SophiConfig: renk, metin, logo, avatar, kapatma butonu ve dil.", listOf("" to Route.Appearance)),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
