@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sophi.sample"
+        applicationId = "com.sophi.sample.external.xml"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

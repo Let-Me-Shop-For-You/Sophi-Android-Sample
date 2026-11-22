@@ -15,7 +15,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.sophi.sample"
+        applicationId = "com.sophi.sample.external.compose"
         minSdk = 23
         targetSdk = 36
         versionCode = 1
