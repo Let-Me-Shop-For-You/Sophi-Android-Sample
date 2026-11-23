@@ -83,6 +83,8 @@ private class SampleListener(private val context: Context) : SophiListener {
         val names = items.joinToString { it.product?.displayName ?: it.externalId }
         if (SampleSettings.cartWriteFails) {
             EventLog.add("onAddToCart", "başarısız: $names")
+            // The SDK shows nothing when the app's cart write fails: the app tells the shopper.
+            Toast.makeText(context, "Sepete eklenemedi: $names", Toast.LENGTH_LONG).show()
             return Result.failure(IllegalStateException("Demo: sepete yazılamadı"))
         }
         EventLog.add("onAddToCart", names)
