@@ -38,7 +38,7 @@ Both modules read the key into `BuildConfig.SOPHI_API_KEY`. If it is missing, th
 
 The two apps have different application ids, so they can be installed side by side.
 
-The SDK version is set by `sophiAndroid` in `gradle/libs.versions.toml`.
+The SDK version is set by `sophiAndroid` in `gradle/libs.versions.toml`, and the SDK comes from Maven Central. To try a local SDK build before it is released, publish it with `./gradlew :sophi:publishToMavenLocal` in Sophi-Android and build the samples with `-PsophiMavenLocal=true`.
 
 ## sample-compose: feature catalog
 

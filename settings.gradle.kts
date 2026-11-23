@@ -17,8 +17,13 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // The samples use the released SDK from Maven Central, as a customer app does.
+        // -PsophiMavenLocal=true takes com.usesophi from mavenLocal first, to try a local SDK
+        // publish before it is released.
+        if (providers.gradleProperty("sophiMavenLocal").orNull == "true") {
+            mavenLocal { content { includeGroup("com.usesophi") } }
+        }
         google()
-        mavenLocal()
         mavenCentral()
     }
 }
