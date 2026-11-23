@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private companion object {
         const val DEMO_MESSAGE = "Merhaba, bir öneri alabilir miyim?"
-        const val DEMO_PRODUCT_ID = "12345"
+        // externalId of a product in the Dev demo catalog; use one of your own catalog's ids.
+        const val DEMO_PRODUCT_ID = "T25003337ME0"
     }
 }

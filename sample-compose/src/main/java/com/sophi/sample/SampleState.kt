@@ -15,7 +15,9 @@ import java.util.Date
 import java.util.Locale
 
 const val DEMO_MESSAGE = "Merhaba, bir öneri alabilir miyim?"
-const val DEMO_PRODUCT_ID = "12345"
+// externalId of a product in the Dev demo catalog ("Ultimate Oxford Gömlek"); a product card shows it
+// after the brand. Use one of your own catalog's ids in a real app.
+const val DEMO_PRODUCT_ID = "T25003337ME0"
 
 data class SampleEvent(val time: String, val name: String, val detail: String)
 
