@@ -7,7 +7,7 @@ kotlin = "2.3.21"
 composeBom = "2026.05.00"
 navigationCompose = "2.9.8"
 detekt = "1.23.8"
-sophiAndroid = "0.0.1-alpha01"
+sophiAndroid = "0.0.1-alpha02"
 
 appcompat = "1.7.1"
 material = "1.14.0"
